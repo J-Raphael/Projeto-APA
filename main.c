@@ -24,7 +24,7 @@ int main()
     FILE *file;
     
 
-    file = fopen("files/P-n19-k2.txt", "r+");
+    file = fopen("files/P-n20-k2.txt", "r+");
     if(file == NULL)
     {
         printf("Problemas na abertura do arquivo.\n");
@@ -32,15 +32,6 @@ int main()
     }
 
     readFile(file);
-    
-    int x, y;
-    for(x = 0; x < 19; x++)
-    { 
-        for(y = 0; y < 2; y++)
-            printf("%d ", demandSenction[x][y]);
-
-        printf("\n");
-    }
 
     fclose(file);
     return 0;
@@ -74,48 +65,17 @@ void splitLine(char *line)
     int cargas = 0, arestas = 0;
     int x = 0, y = 0, z = 0;
     
+    char enter = 13;
+    printf("Enter: %c", enter);
+
     /* walk through other tokens */
     while( token != NULL ) {
-        printf("Tokenn: %s\n", token);
-       if(strcmp(token, "NAME:") == 0)
-       {
-           token = strtok(NULL, " ");
-           strcpy(name, token);
-       }
-       else if(strcmp(token, "DIMENSION:") == 0)
-       {
-           token = strtok(NULL, " ");
-           char aux[255];
-           strcpy(aux, token);
-           dimension = atoi(aux);
-       }
-       else if(strcmp(token, "CAPACITY:") == 0)
-       {
-           token = strtok(NULL, " ");
-           char aux[255];
-           strcpy(aux, token);
-           maxCapacity = atol(aux);
-
-       }
-       else if(strcmp(token, "VEHICLES:") == 0)
-       {
-           token = strtok(NULL, " ");
-           char aux[255];
-           strcpy(aux, token);
-           vehicles = atol(aux);
-       }
-       else if(strcmp(token, "DEMAND_SECTION:") == 0)
-       {
-            cargas = 1;   
-       }
-       else if(cargas)
-       {
-           demandSenction[x][0] = x;
-           token = strtok(); 
-           printf("Token: %s\n", token);
-       }
-       else
-           token = strtok(NULL, line);
+        int x = token[0] - '0';
+        if(-38 != x){
+            printf("Tokenn: %d\n", x);
+            printf("Tokenn: %s\n", token);
+        }
+        token = strtok(NULL, " ");
        
     }
 }

@@ -1,132 +1,115 @@
-// * Bibliotecas utilizadas
-#include <iostream>
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <limits.h>
-#include <locale.h>
+#include "Vehicles.h"
 
-using namespace std;
+#define AND &&
 
-// * Funções utilizadas
-void readFile(FILE *file);
-void splitLine(char line[200]);
-
-// * Variáveis booleanas
-char name[255];
-int dimension;
-int vehicles;
-int capacity;
-int maxCapacity;
-int *demandSenction;
-int **edgeWeightSection;
-int result;
+vector<vector<float>> Transpose(vector<vector<int>>& matrix, int dimension);
 
 int main()
 {
-    setlocale(LC_ALL, "Portuguese");
+    char file[] = "./cvrp-cup/cvrp1.txt";
+    cout << file << endl;
 
-    FILE *file;
+    ifstream arq(file);
+    string buffer;
+
+    int dimension;
+    int vehicles;
+    int capacity;
+    vector<int> demand_section;
+    vector<vector<int>> coordinates;
+
+    int count = 0, valor;
+    char linha[100], *token;
+
+    if(arq)
+    {
+        while (getline(arq, buffer))
+        {
+            if(count == 1){
+                strcpy(linha, buffer.c_str());
+                token = strchr(linha, ' ');
+                dimension = atoi(token++);
+                cout << "Dimension: " << dimension << endl;
+            }
+
+            else if(count == 2){
+                strcpy(linha, buffer.c_str());
+                token = strchr(linha, ' ');
+                vehicles = atoi(token++);
+                cout << "Vehicles: " << vehicles << endl;
+            }
+
+            else if(count == 3){
+                strcpy(linha, buffer.c_str());
+                token = strchr(linha, ' ');
+                capacity = atoi(token++);
+                cout << "Capacity: " << capacity << endl;
+            }
+
+
+            else if(count >= 5 && count < (dimension + 5)){
+                strcpy(linha, buffer.c_str());
+                token = strchr(linha, ' ');
+                demand_section.push_back(atoi(token++));
+            }
+
+            else if(count >= (dimension + 7) && count < (dimension*2 + 7)){
+                coordinates.push_back(vector<int>());
+
+                stringstream split(buffer);
+                
+                while (split >> valor)
+                    coordinates.back().push_back(valor);
+            }
+
+            count ++;
+        }
+        
+    }
     
 
-    file = fopen("files/P-n19-k2.txt", "r+");
-    if(file == NULL)
-    {
-        printf("Problemas na abertura do arquivo.\n");
-        return -1;
-    }
-
-    readFile(file);
-
-    fclose(file);
-    return 0;
-
-
+    vector<vector<float>> matrix = Transpose(coordinates, dimension);
 }
 
+vector<vector<float>> Transpose(vector<vector<int>>& matrix, int dimension){
 
-void readFile(FILE *file)
-{
-    char line[200];
-    char *result;
-    int i = 1;
-    while (!feof(file))
-    {
-        result = fgets(line, 200, file);
+    int b = 0, a = 0, k = 0, o = 0;
 
-        int k = 0;
-        int active = 0;
-
-        if(result)
-        {
-            splitLine(line);
+    vector<vector<float>> transposed_matrix;
+    for(k = 0; k < dimension; k++){
+        vector<float> p;
+        for (o = 0; o < dimension; o++){
+            p.push_back(0.0);
         }
-        i++;
+        transposed_matrix.push_back(p);
     }
-}
 
-void splitLine(char *line)
-{
-    char *token;
-    int keys = 0, x = 0, linha = 0, coluna = 0;
-    int newLine = -38;
-
-    token = strtok(line, " ");
-
-    while (token != NULL)
-    {
-        cout << "KEY: " << keys << endl;
-        cout << "Token: " << token << endl; 
-        int x = token[0] - '0';
-        cout << "Token X: " << x << endl; 
-        if(newLine != x)
-        {
-            cout << "ENTREEEIII " <<endl;
-            switch (keys)
-            {
-            case 1:
-                strcpy(name,token);
-                break;
-           case 2:
-                cout << "ENTREEEIII 2" <<endl;
-                dimension = atoi(token);
-                edgeWeightSection[linha] = (int*)malloc(sizeof(int)*dimension);
-                break;
-            case 3:
-                vehicles = atoi(token);
-                break;
-            case 4:
-                capacity = atoi(token);
-                break;
-            case 5:
-                demandSenction[x] = atoi(token);
-                x ++;
-                break;
-            case 6:
-                edgeWeightSection[linha][coluna] = atoi(token);
-                coluna ++;
-                break;        
-            default:
-                break;
-            }
-
-            if(strcmp("NAME:", token) == 0) keys = 1;
-            else if(strcmp("DIMENSION:", token) == 0) keys = 2;
-            else if(strcmp("VEHICLES:", token) == 0) keys = 3;
-            else if(strcmp("CAPACITY:", token) == 0) keys = 4;
-            else if(strcmp("DEMAND_SECTION:", token) == 0) keys = 5; 
-            else if(strcmp("EDGE_WEIGHT_SECTION:", token) == 0) keys = 6;
-            else keys = keys;
+    //---------------------------------------------------------
+    transposed_matrix.at(0).at(0) = 0;
+    cout << " " << transposed_matrix.at(a).at(b) << " ";
+    while (a < dimension) {
+        if(a == 0){
+            b = 1;
         }
-        else{
-            if(keys == 6){
-                linha ++;
-                coluna = 0;
-                edgeWeightSection[linha] = (int*)malloc(sizeof(int)*dimension);
-            }
+        while (b < dimension){
+            transposed_matrix.at(a).at(b) = sqrt(pow(matrix[a][1] - matrix[b][1], 2) + pow(matrix[a][2] - matrix[b][2], 2));
+            transposed_matrix[b][a] = transposed_matrix[a][b];
+            cout << " " << transposed_matrix.at(a).at(b) << " ";
+            if (a == b)
+                transposed_matrix[a][b] = 0;
+            b += 1;
         }
-
-        token = strtok(NULL, " ");
-        cout << "Token 2: " << token << endl;
+        cout << endl;
+        a += 1;
+        b = 0;
     }
+    //---------------------------------------------------------
+
+    for(k = 0; k < dimension; k++){
+        for (o = 0; o < dimension; o++){
+            cout << " " << transposed_matrix.at(k).at(o) << " ";
+        }
+        cout << "\n";
+    }
+    return transposed_matrix;
 }
